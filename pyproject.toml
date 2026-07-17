@@ -1,0 +1,27 @@
+[project]
+name = "llm-gateway"
+version = "0.1.0"
+description = "A production-style FastAPI gateway in front of the Claude API — typed, tested, containerized, CI'd."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=0.117.0",
+    "fastapi>=0.139.0",
+    "httpx>=0.28.1",
+    "uvicorn[standard]>=0.51.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "mypy>=2.2.0",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.22",
+]
+
+[tool.pytest.ini_options]
+# Let tests in tests/ import the top-level `main` module without packaging.
+pythonpath = ["."]
+testpaths = ["tests"]

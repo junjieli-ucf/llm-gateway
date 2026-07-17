@@ -1,0 +1,44 @@
+# Day 6 作业:GitHub Actions CI
+# 作用:每次 push / 开 PR 时,GitHub 自动帮你跑代码质量检查(ruff + mypy + pytest)。
+# 好处:代码有问题当场红灯,合并前就拦住;这是所有公司的标配,JD 高频词。
+#
+# 放在固定路径 .github/workflows/ci.yml —— GitHub 会自动发现并执行。
+
+name: CI                          # 这个工作流的名字(显示在 GitHub Actions 页)
+
+on:                               # 什么时候触发
+  push:                           # 每次 push 代码
+  pull_request:                   # 每次开 / 更新 PR
+
+jobs:
+  lint-and-test:                  # 一个 job,名字自取
+    runs-on: ubuntu-latest        # 在 GitHub 提供的 Linux 机器上跑
+
+    steps:
+      # 1. 把你的代码拉到这台机器上
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. 装 uv(你本地用的那个包管理器)
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      # 3. 装 Python 3.12
+      - name: Set up Python
+        run: uv python install 3.12
+
+      # 4. 按 pyproject.toml / uv.lock 装所有依赖(含 dev 依赖)
+      - name: Install dependencies
+        run: uv sync --dev
+
+      # 5. ruff:代码风格 / 常见错误检查(比 mypy 快,先跑)
+      - name: Lint (ruff)
+        run: uv run ruff check .
+
+      # 6. mypy:严格类型检查
+      - name: Type check (mypy)
+        run: uv run mypy --strict main.py
+
+      # 7. pytest:跑测试(测试里 mock 掉了 Claude,所以 CI 里【不需要】真的 API key)
+      - name: Test (pytest)
+        run: uv run pytest -v
